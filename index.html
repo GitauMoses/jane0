@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="css/bootstrap.css">
+    <style>
+        body {
+            background-color: black;
+            overflow: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        #countdown {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            align-items: center;
+            display: grid;
+        }
+
+        #showButton {
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Permanent Marker', cursive;
+            border-radius: 3px;
+            display: none;
+        }
+        #comeBack{
+          display: block;
+          margin: 25;
+          text-align: center;
+          font-family: "Caveat Brush";
+          font-size: 25px;
+          color: #ff69b4;
+        }
+
+        #background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: bounce 6s infinite;
+            z-index: 0;
+        }
+
+        .sun {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background-color: yellow;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sunRays 4s infinite linear;
+            box-shadow: 0 0 30px 10px rgb(239, 133, 57);
+            z-index: 1;
+        }
+
+        .confetti {
+            width: 10px;
+            height: 50px;
+            position: absolute;
+            animation: fall 6s ease-out;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-150px);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes sunRays {
+            0%, 100% {
+                transform: rotate(0deg);
+                box-shadow: 0 0 0 10px yellow;
+            }
+            50% {
+                transform: rotate(180deg);
+                box-shadow: 0 0 30px 10px yellow;
+            }
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translate(0, -100vh) rotate(0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(720deg);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-sm-12">
+            <div id="countdown"></div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-sm-12" id="comeBack">
+          <p>Come back on the 26th</p>
+      </div>
+  </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-sm-12 text-center">
+            <button id="showButton">Press Me!!</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 justify-content-center">
+            <div id="background">
+                <div class="sun"></div>
+            </div>
+        </div>
+    </div>
+    <audio id="audio" src="audio.mp3"></audio>
+
+    <script>
+        // Function to get a random integer between min and max
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Function to create a planet element
+        function createPlanet() {
+            const planet = document.createElement('div');
+            planet.classList.add('planet');
+            const size = getRandomInt(10, 40);
+            planet.style.width = `${size}px`;
+            planet.style.height = `${size}px`;
+            planet.style.backgroundColor = `hsl(${getRandomInt(0, 360)}, ${getRandomInt(50, 100)}%, ${getRandomInt(50, 100)}%)`;
+            planet.style.left = `${getRandomInt(0, window.innerWidth)}px`;
+            planet.style.top = `${getRandomInt(0, window.innerHeight)}px`;
+            document.getElementById('background').appendChild(planet);
+        }
+
+        // Create 30 planet elements on page load
+        for (let i = 0; i < 30; i++) {
+            createPlanet();
+        }
+
+        // Function to create confetti elements
+        function createConfetti() {
+            const confettiCount = 150;
+            const colors = ['#ff9999', '#99ff99', '#9999ff', '#ffff99', '#ff99ff', '#99ffff'];
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[getRandomInt(0, colors.length - 1)];
+                confetti.style.left = `${getRandomInt(0, window.innerWidth)}px`;
+                confetti.style.top = `${window.innerHeight}px`;
+                confetti.style.setProperty('--tx', `${getRandomInt(-200, 200)}vw`);
+                confetti.style.setProperty('--ty', `${getRandomInt(-200, 0)}vh`);
+                document.getElementById('background').appendChild(confetti);
+            }
+        }
+
+        // Countdown Timer
+        const targetDate = new Date('2023-11-26T00:00:00');
+
+        setInterval(() => {
+            const now = new Date();
+            const timeRemaining = targetDate - now;
+            const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+            const countdownDisplay = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
+            document.getElementById('countdown').textContent = countdownDisplay;
+
+            if (timeRemaining >= 0) {
+                document.getElementById('showButton').style.display = 'block';
+                document.getElementById("comeBack").style.display="none";
+
+                document.getElementById('showButton').  addEventListener('click', () => {
+                    document.getElementById('audio').play();
+                    createConfetti();
+                    setTimeout(() => {
+                        window.location.href = 'index1.html';
+                    }, 7000);
+                });
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
